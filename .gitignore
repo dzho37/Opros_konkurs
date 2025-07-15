@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.env
+*.venv/
+.env
+.venv/
+venv/
+env/
+ENV/
+
+# Flask / Debug
+instance/
+*.log
+*.sqlite3
+*.db
+*.pid
+
+# Flask Migrations
+migrations/
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pytest / Coverage
+htmlcov/
+.coverage
+.tox/
+.cache/
+
+# VSCode / IDE
+.vscode/
+.idea/
+*.swp
+
+# Compiled static files
+static/*.min.*

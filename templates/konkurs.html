@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конкурс</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='konkurs.css') }}">
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+</head>
+<body>
+    <section>
+        <div class="header">
+          <div class="logo">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Логотип" style="height: 100px;">
+            <div class="representative ">
+                <h3>Служба управления персоналом Департамент корпоративного обеспечения ТОО «PSA»</h3>
+            </div>
+          </div>
+            <div class="title-wrapper">
+                <div class="title">
+                    <h2>Критерии оценки и номинации для работников ТОО «PSA» (штатные работники и работники аутстаффинга) посредством проведения опроса* </h2>
+                </div>
+            </div>
+                <div>
+                    <ol>
+                        <li>Данный конкурс по выбору номинантов по указанным категориям проходит анонимно среди всех работников Товарищества, включая работников аутстаффинга. </li>
+                        <li>Цель - стимулировать работников к достижению положительных показателей в работе.</li>
+                        <li>Победителями Номинаций становятся те, кто набрал больше голосов при анонимном голосовании. </li>
+                        <li>На общем собрании работников Товарищества победители поощряются грамотами/ценными подарками.</li>
+                        <li>Использование данной метрики позволит службе УП установить частично уровень вовлеченности и удовлетворенности персонала.</li>
+                    </ol>
+                </div>
+        </div>
+    </section>
+
+    <section>
+            <div class="title-wrapper">
+                <div class="title">
+                    <h3>Уважаемые коллеги!</h3>
+                    <p>Просим Вас принять участие в анонимном опросе по выбору среди коллег кандидатов для составления Списка на награждение по нижеуказанным номинациям</p>
+                </div>
+            </div>
+    </section>
+{% for nom in nominations %}
+<section class="section-form">
+  <form 
+    hx-post="/submit/{{ nom.key }}" 
+    hx-target="#{{ nom.key }}-response" 
+    hx-swap="outerHTML"
+  >
+    <div class="question-card">
+      <h2 style="display: inline; cursor: pointer;" class="title-question">{{ nom.title }}</h2>
+      <p>{{ nom.description }}</p>
+    </div>
+
+    <label for="{{ nom.key }}_select">Выберите работника:</label>
+    <select id="{{ nom.key }}_select" name="personal">
+      <option value="disabled" disabled selected>Не выбрано</option>
+      {% for c in candidates %}
+        <option value="{{ c.name }}">{{ c.name }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit" class="custom-button">Отправить ответ</button>
+    <div id="{{ nom.key }}-response"></div>
+  </form>
+</section>
+{% endfor %}
+<section class="footer">
+  <div class="title-wrapper">
+    <div class="title">
+      <h2>Благодарим за участие в опросе! </h2>
+    </div>
+  </div>
+</section>
+</body>
+</html>

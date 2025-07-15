@@ -1,0 +1,62 @@
+/* Увеличение размера текста */
+body {
+    font-size: 20px;
+}
+
+select, option {
+    font-size: 20px; /* Увеличение размера текста */
+  }
+
+section {
+       margin-left: 15vw;
+       margin-right: 15vw;
+       margin-top: 3rem;
+       border: 1px solid #e2e8f0;
+       border-radius: 10px;
+       padding: 3rem;
+}
+
+.logo {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5vw;
+}
+
+
+.representative {
+    width: 20rem;
+}
+
+.title-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.title {
+    width: 80rem;
+    text-align: center;
+}
+
+.title-question {
+    color: #26bee4;
+}
+
+.footer {
+    padding-bottom: 5rem;
+    font-size: 50px;
+}
+
+.custom-button {
+  background-color: #26bee4;; /* зелёный */
+  color: #0f172a;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.custom-button:hover {
+  background-color: #8be1f7;; /* темнее при наведении */
+}
