@@ -6,6 +6,7 @@ from models import db, Nomination, Candidate
 from config import Config 
 import uuid
 from nominations import nominations, translate_nomination
+from sqlalchemy import func
 
 
 app = Flask(__name__)
@@ -31,9 +32,13 @@ def submit_htmx(category):
     nomination = translate_nomination(category)
 
     # Получаем или создаём уникальный ID для пользователя
-    voter_id = request.cookies.get(cookie_key)
+    # voter_id = request.cookies.get(cookie_key)
+    # if not voter_id:
+    #     voter_id = str(uuid.uuid4())
+
+    voter_id = request.headers.get("HX-Voter-ID")
     if not voter_id:
-        voter_id = str(uuid.uuid4())
+        return "Ошибка: отсутствует идентификатор голосующего", 400
 
     # Ищем, голосовал ли пользователь за эту категорию
     existing_vote = Nomination.query.filter_by(category=nomination, cookie_id=voter_id).first()
@@ -53,6 +58,55 @@ def submit_htmx(category):
     response.set_cookie(cookie_key, voter_id, max_age=60*60*24*30)  # 30 дней
 
     return response
+
+@app.route("/report")
+def report():
+    results = (
+        db.session.query(Nomination.category, Nomination.employee, func.count().label("votes"))
+        .group_by(Nomination.category, Nomination.employee)
+        .order_by(Nomination.category, func.count().desc())
+        .all()
+    )
+    
+    # Преобразуем в словарь: {категория: [(имя, кол-во голосов), ...]}
+    report_data = {}
+    for category, employee, votes in results:
+        report_data.setdefault(category, []).append((employee, votes))
+
+     # 📌 Добавляем счётчик уникальных голосов
+    total_voters = db.session.query(func.count(func.distinct(Nomination.cookie_id))).scalar()
+
+    return render_template("report.html", report=report_data, total_voters=total_voters)
+
+
+@app.route("/report.csv")
+def download_csv():
+    import csv
+    from io import StringIO
+    from sqlalchemy import func
+
+    results = (
+        db.session.query(Nomination.category, Nomination.employee, func.count().label("votes"))
+        .group_by(Nomination.category, Nomination.employee)
+        .order_by(Nomination.category, func.count().desc())
+        .all()
+    )
+
+    # Используем StringIO и добавляем BOM для Excel
+    si = StringIO()
+    si.write('\ufeff')  # UTF-8 BOM
+
+    writer = csv.writer(si)
+    writer.writerow(["Номинация", "Сотрудник", "Голосов"])
+    for category, employee, votes in results:
+        writer.writerow([category, employee, votes])
+
+    output = si.getvalue()
+    response = make_response(output)
+    response.headers["Content-Disposition"] = "attachment; filename=report.csv"
+    response.headers["Content-type"] = "text/csv; charset=utf-8"
+    return response
+
 
 
 if __name__ == "__main__":

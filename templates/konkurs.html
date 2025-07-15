@@ -73,5 +73,18 @@
     </div>
   </div>
 </section>
+
+<script>
+  // Генерируем и сохраняем voter_id, если нет
+  if (!localStorage.getItem("voter_id")) {
+    localStorage.setItem("voter_id", crypto.randomUUID());
+  }
+
+  // Добавляем voter_id в каждый HTMX-запрос
+  document.body.addEventListener("htmx:configRequest", function(event) {
+    event.detail.headers['HX-Voter-ID'] = localStorage.getItem("voter_id");
+  });
+</script>
+
 </body>
 </html>
