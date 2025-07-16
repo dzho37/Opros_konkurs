@@ -3,15 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Отчёт о голосовании</title>
-  <style>
-    body { font-family: sans-serif; margin: 40px; }
-    h2 { margin-top: 40px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f0f0f0; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='report.css') }}">
 </head>
 <body>
+  <button class="custom-button"><a href="/report.csv">Скачать отчет</a></button>
   <h1>Результаты голосования</h1>
   <p><strong>Всего участников:</strong> {{ total_voters }}</p>
 

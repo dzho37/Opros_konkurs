@@ -8,10 +8,11 @@
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
 </head>
 <body>
-    <section>
+    <section class="header-section">
         <div class="header">
+          <a href="/anketa">Анкета</a>
           <div class="logo">
-                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Логотип" style="height: 100px;">
+                        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Логотип" style="height: 100px;">
             <div class="representative ">
                 <h3>Служба управления персоналом Департамент корпоративного обеспечения ТОО «PSA»</h3>
             </div>
@@ -52,7 +53,6 @@
       <h2 style="display: inline; cursor: pointer;" class="title-question">{{ nom.title }}</h2>
       <p>{{ nom.description }}</p>
     </div>
-
     <label for="{{ nom.key }}_select">Выберите работника:</label>
     <select id="{{ nom.key }}_select" name="personal">
       <option value="disabled" disabled selected>Не выбрано</option>
@@ -60,7 +60,7 @@
         <option value="{{ c.name }}">{{ c.name }}</option>
       {% endfor %}
     </select>
-
+    <textarea name="textarea_info" id="" class=""></textarea>
     <button type="submit" class="custom-button">Отправить ответ</button>
     <div id="{{ nom.key }}-response"></div>
   </form>

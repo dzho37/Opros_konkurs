@@ -7,6 +7,7 @@ class Nomination(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(100), nullable=False)
     employee = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
     cookie_id = db.Column(db.String(128), nullable=False)
 
     __table_args__ = (

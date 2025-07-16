@@ -4,7 +4,6 @@ from flask import Flask, render_template, request, make_response
 from flask_migrate import Migrate
 from models import db, Nomination, Candidate
 from config import Config 
-import uuid
 from nominations import nominations, translate_nomination
 from sqlalchemy import func
 
@@ -25,16 +24,13 @@ def index():
 @app.route("/submit/<category>", methods=["POST"])
 def submit_htmx(category):
     selected = request.form.get("personal")
+    textarea_info = request.form.get("textarea_info")
+    print(textarea_info)
     if not selected or selected == "disabled":
         return "<div style='color:red;'>Вы не выбрали работника</div>", 400
     
     cookie_key = f"voted_{category.lower()}"
     nomination = translate_nomination(category)
-
-    # Получаем или создаём уникальный ID для пользователя
-    # voter_id = request.cookies.get(cookie_key)
-    # if not voter_id:
-    #     voter_id = str(uuid.uuid4())
 
     voter_id = request.headers.get("HX-Voter-ID")
     if not voter_id:
@@ -45,10 +41,11 @@ def submit_htmx(category):
 
     if existing_vote:
         existing_vote.employee = selected  # Обновляем выбор
+        existing_vote.description = textarea_info
         db.session.commit()
         message = f"<div style='color:green;'>Ваш голос обновлён: <strong>{selected} в номинации {nomination}</strong></div>"
     else:
-        new_vote = Nomination(category=nomination, employee=selected, cookie_id=voter_id)
+        new_vote = Nomination(category=nomination, employee=selected, description=textarea_info, cookie_id=voter_id)
         db.session.add(new_vote)
         db.session.commit()
         message = f"<div style='color:green;'>Спасибо! Вы выбрали: <strong>{selected}</strong> в номинации {nomination}</div>"
@@ -85,29 +82,36 @@ def download_csv():
     from io import StringIO
     from sqlalchemy import func
 
+    # results = (
+    #     db.session.query(Nomination.category, Nomination.employee, Nomination.description, func.count().label("votes"))
+    #     .group_by(Nomination.category, Nomination.employee)
+    #     .order_by(Nomination.category, func.count().desc())
+    #     .all()
+    # )
+
     results = (
-        db.session.query(Nomination.category, Nomination.employee, func.count().label("votes"))
-        .group_by(Nomination.category, Nomination.employee)
-        .order_by(Nomination.category, func.count().desc())
-        .all()
+        db.session.query(Nomination.category, Nomination.employee, Nomination.description).all()
     )
 
     # Используем StringIO и добавляем BOM для Excel
     si = StringIO()
     si.write('\ufeff')  # UTF-8 BOM
 
+    # writer = csv.writer(si)
+    # writer.writerow(["Номинация", "Сотрудник", "Голосов", "Описание"])
+    # for category, employee, votes, description in results:
+    #     writer.writerow([category, employee, votes, description])
+
     writer = csv.writer(si)
-    writer.writerow(["Номинация", "Сотрудник", "Голосов"])
-    for category, employee, votes in results:
-        writer.writerow([category, employee, votes])
+    writer.writerow(["Номинация", "Сотрудник", "Голосов", "Описание"])
+    for category, employee, description in results:
+        writer.writerow([category, employee, description])
 
     output = si.getvalue()
     response = make_response(output)
     response.headers["Content-Disposition"] = "attachment; filename=report.csv"
     response.headers["Content-type"] = "text/csv; charset=utf-8"
     return response
-
-
 
 if __name__ == "__main__":
     with app.app_context():
